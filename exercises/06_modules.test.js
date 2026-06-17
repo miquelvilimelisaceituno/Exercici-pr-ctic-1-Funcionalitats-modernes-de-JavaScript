@@ -1,6 +1,9 @@
 import * as Mathy from '../common/Mathy'
 import * as IndexImport from '../common'
 // WRITE YOUR IMPORT STATEMENTS HERE
+import { sqrt as mySqrt, square as mySquare, add } from '../common/Mathy'
+import _ from 'lodash'
+import lodash from 'lodash'
 
 test('can import Mathy', () => {
   // this one's already done! You're welcome :)
