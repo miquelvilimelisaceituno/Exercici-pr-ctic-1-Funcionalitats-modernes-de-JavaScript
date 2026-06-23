@@ -21,7 +21,7 @@ const getCharacter = () => {
 test('22_proxies-1: can wrap an existing object', () => {
   const character = getCharacter()
   // Canvia la línia de sota per crear un `Proxy` que embolcalli l’objecte `character` utilitzant un handler buit (`{}`) i fes que el test passi.
-  const proxy = character
+  const proxy = new Proxy(character, {})
   // Comprova que el proxy no és igual referencialment però sí igual profundament a l'objecte original
   expect(proxy).not.toBe(character) // referencialment diferent
   expect(proxy).toEqual(character) // profundament igual
@@ -29,8 +29,42 @@ test('22_proxies-1: can wrap an existing object', () => {
 
 test('22_proxies-2: handler can intercept gets, sets, and deletes', () => {
   const character = getCharacter()
+  const PROTECTED = ['_id', 'password']
+  const handler = {
+    get(target, key) {
+      if (typeof key === 'string' && key.includes('.')) {
+        const parts = key.split('.')
+        let result = target
+        for (const part of parts) {
+          result = result[part]
+        }
+        return result
+      }
+      return target[key]
+    },
 
-  const handler = {}
+    set(target, key, value) {
+      if (typeof key === 'string' && key.includes('.')) {
+        const parts = key.split('.')
+        let obj = target
+        for (let i = 0; i < parts.length - 1; i++) {
+          obj = obj[parts[i]]
+        }
+        obj[parts[parts.length - 1]] = value
+        return true
+      }
+      target[key] = value
+      return true
+    },
+
+    deleteProperty(target, key) {
+      if (PROTECTED.includes(key)) {
+        return true
+      }
+      delete target[key]
+      return true
+    },
+  }
   const proxy = new Proxy(character, handler)
 
   // Interactua amb el proxy
